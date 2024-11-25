@@ -1,0 +1,19 @@
+doctype html
+html
+  head
+    title Custom Objects
+  body
+    h1 Custom Objects
+    table(border="1")
+      thead
+        tr
+          th Nome
+          th Type
+          th Price
+      tbody
+        each object in objects
+          tr
+            td= object.properties.nome
+            td= object.properties.type
+            td= object.properties.price
+    a(href="/form") Create/Update Object

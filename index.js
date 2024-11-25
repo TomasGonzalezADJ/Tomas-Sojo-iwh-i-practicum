@@ -1,71 +1,76 @@
 const express = require('express');
 const axios = require('axios');
+require('dotenv').config(); // Para manejar variables de entorno
+
 const app = express();
 
+// Configuración del motor de plantillas
 app.set('view engine', 'pug');
 app.use(express.static(__dirname + '/public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// * Please DO NOT INCLUDE the private app access token in your repo. Don't do this practicum in your normal account.
-const PRIVATE_APP_ACCESS = '';
+const PRIVATE_APP_ACCESS = 'pat-na1-556adc7f-e66e-4dca-8581-58da4af5318f'; // Inserta tu token privado aquí, pero NO lo subas al repositorio.
 
-// TODO: ROUTE 1 - Create a new app.get route for the homepage to call your custom object data. Pass this data along to the front-end and create a new pug template in the views folder.
 
-// * Code for Route 1 goes here
 
-// TODO: ROUTE 2 - Create a new app.get route for the form to create or update new custom object data. Send this data along in the next route.
-
-// * Code for Route 2 goes here
-
-// TODO: ROUTE 3 - Create a new app.post route for the custom objects form to create or update your custom object data. Once executed, redirect the user to the homepage.
-
-// * Code for Route 3 goes here
-
-/** 
-* * This is sample code to give you a reference for how you should structure your calls. 
-
-* * App.get sample
-app.get('/contacts', async (req, res) => {
-    const contacts = 'https://api.hubspot.com/crm/v3/objects/contacts';
+// RUTA 1: Página principal que muestra los datos de los objetos personalizados
+app.get('/', async (req, res) => {
+    const customObjectsUrl = 'https://api.hubapi.com/crm/v3/objects/2-37313391?properties=nome,type,price';
     const headers = {
         Authorization: `Bearer ${PRIVATE_APP_ACCESS}`,
-        'Content-Type': 'application/json'
-    }
-    try {
-        const resp = await axios.get(contacts, { headers });
-        const data = resp.data.results;
-        res.render('contacts', { title: 'Contacts | HubSpot APIs', data });      
-    } catch (error) {
-        console.error(error);
-    }
-});
-
-* * App.post sample
-app.post('/update', async (req, res) => {
-    const update = {
-        properties: {
-            "favorite_book": req.body.newVal
-        }
-    }
-
-    const email = req.query.email;
-    const updateContact = `https://api.hubapi.com/crm/v3/objects/contacts/${email}?idProperty=email`;
-    const headers = {
-        Authorization: `Bearer ${PRIVATE_APP_ACCESS}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
     };
 
-    try { 
-        await axios.patch(updateContact, update, { headers } );
-        res.redirect('back');
-    } catch(err) {
-        console.error(err);
+    const params = {
+        properties: ['nome', 'type', 'price'] // Add the property names you want here
+      }
+
+    try {
+        const response = await axios.get(customObjectsUrl, { headers, params });
+        const customObjects = response.data.results || []; // Validar resultados
+        console.log(customObjects)
+        res.render('homepage', { title: 'Custom Objects', objects: customObjects });
+    } catch (error) {
+        console.error('Error al obtener los objetos:', error.response?.data || error.message);
+        res.status(500).send('Error al obtener los objetos personalizados.');
     }
-
 });
-*/
 
+// RUTA 2: Página con formulario para crear o actualizar datos
+app.get('/form', (req, res) => {
+    res.render('form', { title: 'Crear/Actualizar Objeto Personalizado' });
+});
 
-// * Localhost
+// RUTA 3: Crear o actualizar datos de objetos personalizados
+app.post('/form', async (req, res) => {
+    const createOrUpdateUrl = 'https://api.hubapi.com/crm/v3/objects/2-37313391';
+    const headers = {
+        Authorization: `Bearer ${PRIVATE_APP_ACCESS}`,
+        'Content-Type': 'application/json',
+    };
+
+    const newObjectData = {
+        properties: {
+            nome: req.body.nome || '',
+            type: req.body.type || '',
+            price: req.body.price || '',
+        },
+    };
+
+    try {
+        await axios.post(createOrUpdateUrl, newObjectData, { headers });
+        res.redirect('/');
+    } catch (error) {
+        console.error('Error al crear o actualizar el objeto:', error.response?.data || error.message);
+        res.status(500).send('Error al crear o actualizar el objeto personalizado.');
+    }
+});
+
+// Iniciar el servidor en localhost
 app.listen(3000, () => console.log('Listening on http://localhost:3000'));
+
+
+
+
+
