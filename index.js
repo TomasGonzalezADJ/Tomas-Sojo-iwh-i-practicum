@@ -10,7 +10,7 @@ app.use(express.static(__dirname + '/public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-const PRIVATE_APP_ACCESS = 'pat-na1-556adc7f-e66e-4dca-8581-58da4af5318f'; // Inserta tu token privado aquí, pero NO lo subas al repositorio.
+const PRIVATE_APP_ACCESS = process.env.PRIVATE_APP_ACCESS; // Inserta tu token privado aquí, pero NO lo subas al repositorio.
 
 
 
